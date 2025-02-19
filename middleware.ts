@@ -24,12 +24,12 @@ export default async function middleware(req: NextRequest) {
   }
 
   if (adminRoutes.includes(req.nextUrl.pathname) && userRole !== "admin") {
-    return NextResponse.redirect(new URL("/jobs", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/", "/auth/:path*", "/dashboard", "/jobs"],
+  matcher: ["/", "/auth/:path*", "/dashboard", "/jobs", "/application"],
 };
