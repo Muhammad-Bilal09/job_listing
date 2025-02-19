@@ -4,31 +4,16 @@ import { useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
-import { FaSearch } from "react-icons/fa";
-
-type Job = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  location: string;
-  salary: number;
-  posted_by: string;
-};
-
-type Application = {
-  id: string;
-  job_id: string;
-  user_id: string;
-  resume: string;
-  status: string;
-};
+import { Job } from "@/types/Types";
+import { Application } from "@/types/Types";
+import { gradients } from "@/constants/constants";
 
 export default function JobsPage() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
+  const [Title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [resume, setResume] = useState<File | null>(null);
@@ -48,11 +33,10 @@ export default function JobsPage() {
 
   const filteredJobs = jobs.filter(
     (job: Job) =>
-      (search
-        ? job.title.toLowerCase().includes(search.toLowerCase())
-        : true) &&
-      (location ? job.location === location : true) &&
-      (category ? job.category === category : true)
+      (!search || job.title.toLowerCase().includes(search.toLowerCase())) &&
+      (!location || job.location === location) &&
+      (!category || job.category === category) &&
+      (!Title || job.title === Title)
   );
 
   const applyForJobMutation = useMutation({
@@ -126,11 +110,11 @@ export default function JobsPage() {
       <div className="flex flex-wrap mt-6 bg-white p-4 rounded-lg shadow-lg my-12 gap-4">
         <select
           className="p-3 w-60 border border-gray-300 rounded outline-none text-black"
-          value={title}
-          onChange={(e) => setLocation(e.target.value)}
+          value={Title}
+          onChange={(e) => setTitle(e.target.value)}
         >
           <option value="">Select Location</option>
-          {title.map((loc) => (
+          {title.map((loc: any) => (
             <option key={loc} value={loc}>
               {loc}
             </option>
@@ -143,7 +127,7 @@ export default function JobsPage() {
           onChange={(e) => setLocation(e.target.value)}
         >
           <option value="">Select Location</option>
-          {locations.map((loc) => (
+          {locations.map((loc: any) => (
             <option key={loc} value={loc}>
               {loc}
             </option>
@@ -156,7 +140,7 @@ export default function JobsPage() {
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="">Select Category</option>
-          {categories.map((cat) => (
+          {categories.map((cat: any) => (
             <option key={cat} value={cat}>
               {cat}
             </option>
@@ -164,28 +148,44 @@ export default function JobsPage() {
         </select>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+      <div className="w-full flex justify-center items-center">
         {isLoading ? (
-          <p className="grid-flow-row-center">Loading jobs...</p>
+          <p className="text-lg font-semibold text-gray-600 animate-pulse">
+            Loading jobs...
+          </p>
         ) : (
-          filteredJobs.map((job: Job) => (
-            <div
-              key={job.id}
-              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition cursor-pointer"
-              onClick={() => setSelectedJob(job)}
-            >
-              <h3 className="text-xl font-semibold text-blue-700">
-                {job.title}
-              </h3>
-              <p className="text-gray-600">{job.location}</p>
-              <p className="text-gray-500 text-sm">{job.category}</p>
-              <p className="text-gray-800 mt-2">{job.description}</p>
-              <p className="text-gray-700 font-bold mt-4">${job.salary}</p>
-              <p className="text-gray-500 text-sm mt-1">
-                Posted by: {job.posted_by}
-              </p>
-            </div>
-          ))
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+            {filteredJobs.map((job: Job, index: number) => (
+              <div
+                key={job.id}
+                className={`bg-gradient-to-br ${
+                  gradients[index % gradients.length]
+                } 
+                      p-6 rounded-2xl shadow-md hover:shadow-2xl 
+                      transition-transform transform hover:-translate-y-2 
+                      cursor-pointer border border-gray-200`}
+              >
+                <h3 className="text-xl font-bold text-white">{job.title}</h3>
+                <p className="text-gray-200 mt-1">{job.location}</p>
+                <p className="text-gray-100 text-sm">{job.category}</p>
+                <p className="text-white mt-2 text-sm line-clamp-2">
+                  {job.description}
+                </p>
+                <p className="text-yellow-200 font-bold text-lg mt-4">
+                  ${job.salary}
+                </p>
+                <p className="text-gray-100 text-xs mt-1">
+                  Posted by: {job.posted_by}
+                </p>
+                <button
+                  className="w-full mt-5 bg-gradient-to-r from-blue-900 to-green-100 text-white py-2 rounded-lg hover:opacity-90 transition"
+                  onClick={() => setSelectedJob(job)}
+                >
+                  Apply Now
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

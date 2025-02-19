@@ -43,6 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.name = token.name as string;
         session.user.role = token.role as string;
       }
+      console.log(session, "auth file");
       return session;
     },
 

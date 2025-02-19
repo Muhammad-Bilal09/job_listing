@@ -4,21 +4,77 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { FaPlus, FaEdit, FaTrash, FaTimes, FaBars } from "react-icons/fa";
+import { LuLogOut } from "react-icons/lu";
+import { signOut } from "next-auth/react";
+import { Job } from "@/types/Types";
+import { SidebarProps } from "@/types/Types";
+import Link from "next/link";
 
-type Job = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  location: string;
-  salary: number;
-  posted_by: string;
-};
+const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  setIsOpen,
+  setIsModelOpen,
+  isModelOpen,
+}) => (
+  <>
+    {isOpen && (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-40"
+        onClick={() => setIsOpen(false)}
+      />
+    )}
 
-export default function AdminJobsDashboard() {
+    <aside
+      className={`fixed top-0 left-0 w-64 bg-gradient-to-r from-gray-500 to-gray-700 text-white p-5 h-full flex flex-col z-50 transition-transform ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      } lg:translate-x-0 lg:flex`}
+    >
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-blue-500">Admin Panel</h2>
+        <FaTimes
+          className="lg:hidden text-white text-2xl cursor-pointer"
+          onClick={() => setIsOpen(false)}
+        />
+      </div>
+
+      <ul className="flex-grow">
+        <li
+          className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded"
+          onClick={() => setIsModelOpen(true)}
+        >
+          <FaPlus /> <span>Add Job</span>
+        </li>
+        <li className="flex items-center space-x-2 my-4 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
+          <Link href="/jobs">
+            <span>Jobs</span>
+          </Link>
+        </li>
+        <li className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
+          <Link href="/application">
+            <span>Applications</span>
+          </Link>
+        </li>
+      </ul>
+
+      <ul>
+        <li
+          className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-red-500 hover:bg-red-400 rounded"
+          onClick={() => signOut()}
+        >
+          <span>Logout</span>
+          <LuLogOut />
+        </li>
+      </ul>
+    </aside>
+  </>
+);
+
+const AdminJobsDashboard: React.FC = () => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Job>({
+    id: "",
     title: "",
     description: "",
     category: "",
@@ -28,8 +84,9 @@ export default function AdminJobsDashboard() {
   });
   const [editingJob, setEditingJob] = useState<Job | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isModelOpen, setIsModelOpen] = useState(false);
 
-  const { data: jobs = [], isLoading } = useQuery({
+  const { data: jobs = [], isLoading } = useQuery<Job[]>({
     queryKey: ["jobs"],
     queryFn: async () => {
       const res = await axios.get("/api/getJobs");
@@ -38,60 +95,37 @@ export default function AdminJobsDashboard() {
   });
 
   const addJobMutation = useMutation({
-    mutationFn: async (newJob: typeof form) => {
-      return axios.post("/api/addJobs", newJob);
-    },
+    mutationFn: async (newJob: Omit<Job, "id">) =>
+      axios.post("/api/addJobs", newJob),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+
       setIsOpen(false);
       resetForm();
     },
   });
 
   const updateJobMutation = useMutation({
-    mutationFn: async (updatedJob: Job) => {
-      return axios.put(`/api/updateJobs/${updatedJob.id}`, updatedJob);
-    },
+    mutationFn: async (updatedJob: Job) =>
+      axios.put(`/api/updateJobs/${updatedJob.id}`, updatedJob),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+
       setIsOpen(false);
       resetForm();
     },
   });
 
   const deleteJobMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return axios.delete(`/api/deleteJobs/${id}`);
-    },
+    mutationFn: async (id: string) => axios.delete(`/api/deleteJobs/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },
   });
 
-  async function handleSubmit() {
-    if (!session?.user?.id) {
-      alert("You must be logged in to add or update jobs.");
-      return;
-    }
-
-    const jobData = {
-      ...form,
-      posted_by: session.user.id,
-    };
-
-    if (editingJob) {
-      updateJobMutation.mutate({ ...jobData, id: editingJob.id });
-    } else {
-      addJobMutation.mutate(jobData);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    deleteJobMutation.mutate(id);
-  }
-
   function resetForm() {
     setForm({
+      id: "",
       title: "",
       description: "",
       category: "",
@@ -103,93 +137,95 @@ export default function AdminJobsDashboard() {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen flex flex-col items-center">
-      <h1 className="text-4xl font-extrabold mb-6 text-gray-800">
-        Admin Job Listings
-      </h1>
-      <button
-        onClick={() => {
-          setIsOpen(true);
-          setEditingJob(null);
-        }}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition mb-4"
-      >
-        Add Job
-      </button>
+    <div className="flex flex-col lg:flex-row min-h-screen">
+      {!isOpen && (
+        <button
+          className="lg:hidden p-3 text-2xl bg-gray-700 text-white fixed top-4 left-4 z-50 rounded"
+          onClick={() => setIsOpen(true)}
+        >
+          <FaBars />
+        </button>
+      )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <Sidebar
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        setIsModelOpen={setIsModelOpen}
+        isModelOpen={isModelOpen}
+      />
+      <main className="flex-1 p-6 bg-gray-100 md:ml-64">
+        <h1 className="text-3xl font-bold mb-6 text-center">Job Listings</h1>
+
         {isLoading ? (
           <p className="text-center">Loading jobs...</p>
         ) : (
-          jobs.map((job: Job) => (
-            <div
-              key={job.id}
-              className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition"
-            >
-              <h3 className="text-xl font-semibold mb-2">Title:{job.title}</h3>
-              <p className="text-gray-700 mb-2">
-                discription:{job.description}
-              </p>
-              <p className="text-gray-600">Category: {job.category}</p>
-              <p className="text-gray-600">Location: {job.location}</p>
-              <p className="text-gray-600">Salary: ${job.salary}</p>
-              <div className="flex space-x-2 mt-4">
-                <button
-                  onClick={() => {
-                    setForm(job);
-                    setEditingJob(job);
-                    setIsOpen(true);
-                  }}
-                  className="bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600 transition"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(job.id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {jobs.map((job) => (
+              <div
+                key={job.id}
+                className="bg-white p-6 rounded-lg shadow-md break-words min-w-[200px] max-w-md w-full overflow-hidden"
+              >
+                <h3 className="text-xl font-bold truncate">{job.title}</h3>
+                <p className="text-gray-600 line-clamp-3">{job.description}</p>
+                <p className="text-gray-600">
+                  Category: <span className="break-words">{job.category}</span>
+                </p>
+                <p className="text-gray-600">
+                  Location: <span className="break-words">{job.location}</span>
+                </p>
+                <p className="text-gray-600">Salary: ${job.salary}</p>
 
-      {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">
-              {editingJob ? "Edit Job" : "Add Job"}
-            </h2>
+                <div className="flex space-x-3 mt-4">
+                  <button
+                    className="bg-yellow-500 text-white px-3 py-1 rounded flex items-center space-x-2"
+                    onClick={() => {
+                      setForm(job);
+                      setEditingJob(job);
+                      setIsModelOpen(true);
+                    }}
+                  >
+                    <FaEdit /> <span>Edit</span>
+                  </button>
+                  <button
+                    className="bg-red-500 text-white px-3 py-1 rounded flex items-center space-x-2"
+                    onClick={() => deleteJobMutation.mutate(job.id)}
+                  >
+                    <FaTrash /> <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {isModelOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">
+                {editingJob ? "Edit Job" : "Add Job"}
+              </h2>
+              <FaTimes
+                className="cursor-pointer"
+                onClick={() => setIsModelOpen(false)}
+              />
+            </div>
+            {(["title", "description", "category", "location"] as const).map(
+              (field) => (
+                <input
+                  key={field}
+                  className="w-full p-2 border rounded mb-2"
+                  placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
+                  value={form[field]}
+                  onChange={(e) =>
+                    setForm({ ...form, [field]: e.target.value })
+                  }
+                />
+              )
+            )}
             <input
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="Title"
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
-            />
-            <input
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) =>
-                setForm({ ...form, description: e.target.value })
-              }
-            />
-            <input
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="Category"
-              value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-            />
-            <input
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="Location"
-              value={form.location}
-              onChange={(e) => setForm({ ...form, location: e.target.value })}
-            />
-            <input
-              className="w-full mb-2 p-2 border rounded"
+              className="w-full p-2 border rounded mb-2"
               placeholder="Salary"
               type="number"
               value={form.salary}
@@ -197,34 +233,33 @@ export default function AdminJobsDashboard() {
                 setForm({ ...form, salary: Number(e.target.value) })
               }
             />
-
-            <input
-              className="w-full mb-2 p-2 border rounded"
-              placeholder="Posted By"
-              value={form.posted_by}
-              onChange={(e) => setForm({ ...form, posted_by: e.target.value })}
-              disabled
-            />
             <button
-              onClick={handleSubmit}
-              className={`w-full ${
-                addJobMutation.isPending || updateJobMutation.isPending
-                  ? "bg-gray-400"
-                  : "bg-green-500"
-              } text-white p-2 rounded hover:bg-green-600 transition`}
+              className="w-full bg-blue-500 text-white p-2 rounded flex justify-center items-center space-x-2"
+              onClick={() => {
+                if (editingJob) {
+                  updateJobMutation.mutate(form);
+                } else {
+                  addJobMutation.mutate({
+                    ...form,
+                    posted_by: session?.user?.id ?? "",
+                  });
+                }
+              }}
               disabled={addJobMutation.isPending || updateJobMutation.isPending}
             >
-              {editingJob ? "Update Job" : "Create Job"}
-            </button>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="w-full mt-2 bg-gray-500 text-white p-2 rounded hover:bg-gray-600 transition"
-            >
-              Cancel
+              {addJobMutation.isPending || updateJobMutation.isPending ? (
+                <span className="animate-spin border-t-2 border-white border-solid rounded-full w-4 h-4"></span>
+              ) : editingJob ? (
+                "Update Job"
+              ) : (
+                "Create Job"
+              )}
             </button>
           </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default AdminJobsDashboard;

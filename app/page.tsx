@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
 import Jobs from "@/app/jobs/page";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { LuLogOut } from "react-icons/lu";
+import { companyLogos } from "@/constants/constants";
 
 export default function Page() {
   return (
     <div className="text-white">
-      <nav className="flex justify-between items-center p-6 shadow-md">
+      <nav className="flex justify-between items-center p-4 lg:p-6 shadow-md flex-wrap">
         <Link href="/">
           <img
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSa2MIKJFzxdfzDrXwbElUQZnWVxbNiGKAq2g&s"
@@ -18,7 +19,7 @@ export default function Page() {
             className="rounded-full"
           />
         </Link>
-        <ul className="flex space-x-6">
+        <ul className="hidden lg:flex space-x-6">
           <li>
             <Link className="cursor-pointer" href="/dashboard">
               Dashboard
@@ -29,84 +30,48 @@ export default function Page() {
               Jobs
             </Link>
           </li>
-          <li>
-            <Link className="cursor-pointer" href="/detail">
-              Detail
-            </Link>
-          </li>
-          <li>
-            <Link className="cursor-pointer" href="/contact-us">
-              Contact Us
-            </Link>
-          </li>
         </ul>
-        <div className="flex items-center space-x-4">
-          <Link className="text-sm" href="/auth/login">
+        <div className="flex items-center space-x-3 lg:space-x-4 mt-3 lg:mt-0">
+          <Link className="text-sm max-sm:hidden" href="/auth/login">
             Login
           </Link>
           <Link
-            className="px-4 py-2 bg-green-500 rounded-lg text-sm"
+            className="px-4 py-2 max-sm:hidden bg-green-500 rounded-lg text-sm"
             href="/auth/register"
           >
             Register
           </Link>
+          <button
+            className="flex items-center gap-1 p-2 text-sm cursor-pointer text-black hover:text-white bg-red-500 hover:bg-red-400 rounded"
+            onClick={() => {
+              signOut();
+            }}
+          >
+            Logout <LuLogOut />
+          </button>
         </div>
       </nav>
-
-      <section className="flex flex-col items-center justify-center text-center mt-16">
-        <h1 className="text-5xl font-extrabold">Find Your Dream Job Today!</h1>
+      <section className="flex flex-col items-center justify-center text-center mt-12 px-4 lg:px-0">
+        <h1 className="text-3xl lg:text-5xl font-extrabold">
+          Find Your Dream Job Today!
+        </h1>
         <p className="text-gray-400 mt-3">
           Connecting Talent with Opportunity: Your Gateway to Career Success
         </p>
       </section>
-
-      <section className="mt-12 flex justify-center space-x-16 text-center">
-        <div>
-          <h2 className="text-2xl font-bold">25,850</h2>
-          <p className="text-gray-400">Jobs</p>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold">10,220</h2>
-          <p className="text-gray-400">Candidates</p>
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold">18,400</h2>
-          <p className="text-gray-400">Companies</p>
-        </div>
+      <section className="flex flex-wrap justify-center mt-12 gap-6 px-6 lg:px-0">
+        {companyLogos.map((company, index) => (
+          <img
+            key={index}
+            src={company.src}
+            alt={company.alt}
+            width={80}
+            height={40}
+            className="w-20 md:w-24"
+          />
+        ))}
       </section>
 
-      <section className="flex justify-center mt-16 space-x-10">
-        <img
-          src="https://t4.ftcdn.net/jpg/03/95/35/17/360_F_395351750_edaLRQmUwxIjtgMuZ3WZgyVlT8yvcbx7.jpg"
-          alt="Spotify"
-          width={100}
-          height={50}
-        />
-        <img
-          src="https://i.pcmag.com/imagery/reviews/07td46ju7p6lLVb0QGwc5VF-6.fit_scale.size_760x427.v1569479844.jpg"
-          alt="Slack"
-          width={100}
-          height={50}
-        />
-        <img
-          src="https://www.adobe.com/content/dam/cc/us/en/products/Adobe-social-share-image.jpg"
-          alt="Adobe"
-          width={100}
-          height={50}
-        />
-        <img
-          src="https://i.pcmag.com/imagery/reviews/07koiYlrzusMasUtb8S1jz8-14..v1580335304.png"
-          alt="Asana"
-          width={100}
-          height={50}
-        />
-        <img
-          src="https://blog.lama.dev/images/next-auth-iron-session-server-action.png"
-          alt="session"
-          width={100}
-          height={50}
-        />
-      </section>
       <Jobs />
     </div>
   );
