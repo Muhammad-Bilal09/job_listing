@@ -45,16 +45,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         >
           <FaPlus /> <span>Add Job</span>
         </li>
-        <li className="flex items-center space-x-2 my-4 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
-          <Link href="/jobs">
-            <span>Jobs</span>
-          </Link>
-        </li>
-        <li className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
-          <Link href="/application">
-            <span>Applications</span>
-          </Link>
-        </li>
+        <Link href="/jobs">
+          <li className="flex items-center space-x-2 my-4 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
+            Jobs
+          </li>
+        </Link>
+        <Link href="/application">
+          <li className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
+            Applications
+          </li>
+        </Link>
       </ul>
 
       <ul>

@@ -18,6 +18,7 @@ export default function ApplicationPage() {
     queryKey: ["applications"],
     queryFn: async () => {
       const response = await axios.get("/api/getApplication");
+
       return response.data.applications;
     },
   });
@@ -28,6 +29,7 @@ export default function ApplicationPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
+      console.log(data);
     },
   });
 

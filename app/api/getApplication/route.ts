@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
         user: true,
       },
     });
-
+    console.log(applications);
     return NextResponse.json({ success: true, applications });
   } catch (error: unknown) {
     const errorMessage =

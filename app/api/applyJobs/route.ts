@@ -119,19 +119,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-
-export async function GET(req: Request) {
-  try {
-    const applications = await prisma.application.findMany({
-      include: {
-        job: true,
-        user: true,
-      },
-    });
-    return NextResponse.json({ success: true, applications });
-  } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Failed to fetch applications";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
-  }
-}
