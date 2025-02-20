@@ -38,20 +38,20 @@ const Sidebar: React.FC<SidebarProps> = ({
         />
       </div>
 
-      <ul className="flex-grow">
+      <ul className="flex-grow justify-center items-center">
         <li
-          className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded"
+          className="flex items-center justify-center space-x-1 p-3 cursor-pointer  hover:text-white  hover:bg-blue-400 rounded"
           onClick={() => setIsModelOpen(true)}
         >
           <FaPlus /> <span>Add Job</span>
         </li>
         <Link href="/jobs">
-          <li className="flex items-center space-x-2 my-4 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
+          <li className="flex items-center justify-center space-x-2 my-4 p-3 cursor-pointer hover:text-white  hover:bg-blue-400 rounded">
             Jobs
           </li>
         </Link>
         <Link href="/application">
-          <li className="flex items-center space-x-2 p-3 cursor-pointer text-black hover:text-white bg-blue-200 hover:bg-blue-400 rounded">
+          <li className="flex items-center space-x-2 justify-center p-3 cursor-pointer  hover:text-white  hover:bg-blue-400 rounded">
             Applications
           </li>
         </Link>
@@ -154,7 +154,9 @@ const AdminJobsDashboard: React.FC = () => {
         isModelOpen={isModelOpen}
       />
       <main className="flex-1 p-6 bg-gray-100 md:ml-64">
-        <h1 className="text-3xl font-bold mb-6 text-center">Job Listings</h1>
+        <h1 className="text-3xl font-bold mb-6 text-center text-blue-500">
+          Job Listings
+        </h1>
 
         {isLoading ? (
           <p className="text-center">Loading jobs...</p>
@@ -228,9 +230,12 @@ const AdminJobsDashboard: React.FC = () => {
               className="w-full p-2 border rounded mb-2"
               placeholder="Salary"
               type="number"
-              value={form.salary}
+              value={form.salary === 0 ? "" : form.salary}
               onChange={(e) =>
-                setForm({ ...form, salary: Number(e.target.value) })
+                setForm({
+                  ...form,
+                  salary: e.target.value === "" ? 0 : Number(e.target.value),
+                })
               }
             />
             <button

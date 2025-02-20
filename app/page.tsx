@@ -30,6 +30,11 @@ export default function Page() {
               Jobs
             </Link>
           </li>
+          <li>
+            <Link className="cursor-pointer" href="/userApplication">
+              userApplication
+            </Link>
+          </li>
         </ul>
         <div className="flex items-center space-x-3 lg:space-x-4 mt-3 lg:mt-0">
           <Link className="text-sm max-sm:hidden" href="/auth/login">

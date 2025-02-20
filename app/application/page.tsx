@@ -2,14 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-
-interface JobApplication {
-  id: string;
-  job: { title: string };
-  user: { name: string };
-  status: string;
-  resume: string;
-}
+import { JobApplication } from "@/types/Types";
 
 export default function ApplicationPage() {
   const queryClient = useQueryClient();
@@ -19,7 +12,7 @@ export default function ApplicationPage() {
     queryFn: async () => {
       const response = await axios.get("/api/getApplication");
 
-      return response.data.applications;
+      return response.data?.applications ?? [];
     },
   });
 

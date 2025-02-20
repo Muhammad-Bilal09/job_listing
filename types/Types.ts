@@ -33,3 +33,11 @@ export type Application = {
   resume: string;
   status: string;
 };
+
+export type JobApplication = {
+  id: string;
+  job: { title: string };
+  user: { name: string };
+  status: string;
+  resume: string;
+};

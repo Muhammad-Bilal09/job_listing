@@ -15,6 +15,7 @@ export default function JobsPage() {
   const [location, setLocation] = useState("");
   const [Title, setTitle] = useState("");
   const [category, setCategory] = useState("");
+  const [minSalary, setMinSalary] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [resume, setResume] = useState<File | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<boolean | null>(null);
@@ -35,8 +36,8 @@ export default function JobsPage() {
     (job: Job) =>
       (!search || job.title.toLowerCase().includes(search.toLowerCase())) &&
       (!location || job.location === location) &&
-      (!category || job.category === category) &&
-      (!Title || job.title === Title)
+      (!Title || job.title === Title) &&
+      (!minSalary || job.salary >= parseFloat(minSalary))
   );
 
   const applyForJobMutation = useMutation({
@@ -105,7 +106,7 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="p-6 min-h-screen flex flex-col items-center">
+    <div className="p-6 min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-4xl font-extrabold my-6  text-white">Job Listings</h1>
       <div className="flex flex-wrap mt-6 bg-white p-4 rounded-lg shadow-lg my-12 gap-4">
         <select
@@ -113,7 +114,7 @@ export default function JobsPage() {
           value={Title}
           onChange={(e) => setTitle(e.target.value)}
         >
-          <option value="">Select Location</option>
+          <option value="">Select Title</option>
           {title.map((loc: any) => (
             <option key={loc} value={loc}>
               {loc}
@@ -133,19 +134,13 @@ export default function JobsPage() {
             </option>
           ))}
         </select>
-
-        <select
+        <input
+          type="number"
           className="p-3 w-60 border border-gray-300 rounded outline-none text-black"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat: any) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
+          placeholder="Min Salary (Rs)"
+          value={minSalary}
+          onChange={(e) => setMinSalary(e.target.value)}
+        />
       </div>
 
       <div className="w-full flex justify-center items-center">
@@ -172,7 +167,7 @@ export default function JobsPage() {
                   {job.description}
                 </p>
                 <p className="text-yellow-200 font-bold text-lg mt-4">
-                  ${job.salary}
+                  Rs-{job.salary}
                 </p>
                 <p className="text-gray-100 text-xs mt-1">
                   Posted by: {job.posted_by}
@@ -202,7 +197,7 @@ export default function JobsPage() {
             <p className="text-gray-700 mb-2">
               Category: {selectedJob.category}
             </p>
-            <p className="text-gray-700 mb-2">Salary: ${selectedJob.salary}</p>
+            <p className="text-gray-700 mb-2">Salary: Rs{selectedJob.salary}</p>
             <p className="text-gray-700 mb-4">
               Posted by: {selectedJob.posted_by}
             </p>
