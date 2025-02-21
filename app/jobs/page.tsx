@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { Job } from "@/types/Types";
 import { Application } from "@/types/Types";
 import { gradients } from "@/constants/constants";
+import { useRouter } from "next/navigation";
 
 export default function JobsPage() {
   const queryClient = useQueryClient();
@@ -14,7 +15,6 @@ export default function JobsPage() {
   const [search, setSearch] = useState("");
   const [location, setLocation] = useState("");
   const [Title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
   const [minSalary, setMinSalary] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [resume, setResume] = useState<File | null>(null);
@@ -31,6 +31,7 @@ export default function JobsPage() {
   const locations = [...new Set(jobs.map((job: Job) => job.location))];
   const categories = [...new Set(jobs.map((job: Job) => job.category))];
   const title = [...new Set(jobs.map((job: Job) => job.title))];
+  const router = useRouter();
 
   const filteredJobs = jobs.filter(
     (job: Job) =>
@@ -77,6 +78,11 @@ export default function JobsPage() {
       alert("You must be logged in to apply for a job.");
       return;
     }
+    const userRole = session.user.role;
+    if (userRole !== "user" && userRole !== "os") {
+      alert("You do not have permission to apply for this job.");
+      return;
+    }
 
     if (!resume) {
       alert("Please upload your resume before applying.");
@@ -107,10 +113,12 @@ export default function JobsPage() {
 
   return (
     <div className="p-6 min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-4xl font-extrabold my-6  text-white">Job Listings</h1>
-      <div className="flex flex-wrap mt-6 bg-white p-4 rounded-lg shadow-lg my-12 gap-4">
+      <h1 className="text-4xl font-extrabold my-6  text-blue-500">
+        Job Listings
+      </h1>
+      <div className="flex flex-wrap bg-gradient-to-r from-blue-900 to-green-100 p-4 rounded-lg shadow-lg gap-4">
         <select
-          className="p-3 w-60 border border-gray-300 rounded outline-none text-black"
+          className="w-60 border border-gray-300 rounded outline-none text-black"
           value={Title}
           onChange={(e) => setTitle(e.target.value)}
         >
@@ -123,7 +131,7 @@ export default function JobsPage() {
         </select>
 
         <select
-          className="p-3 w-60 border border-gray-300 rounded outline-none text-black"
+          className="p-2 w-60 border border-gray-300 rounded outline-none text-black"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         >
@@ -136,7 +144,7 @@ export default function JobsPage() {
         </select>
         <input
           type="number"
-          className="p-3 w-60 border border-gray-300 rounded outline-none text-black"
+          className="p-2 w-60 border border-gray-300 rounded outline-none text-black"
           placeholder="Min Salary (Rs)"
           value={minSalary}
           onChange={(e) => setMinSalary(e.target.value)}
@@ -149,7 +157,7 @@ export default function JobsPage() {
             Loading jobs...
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full mt-10">
             {filteredJobs.map((job: Job, index: number) => (
               <div
                 key={job.id}
@@ -174,7 +182,13 @@ export default function JobsPage() {
                 </p>
                 <button
                   className="w-full mt-5 bg-gradient-to-r from-blue-900 to-green-100 text-white py-2 rounded-lg hover:opacity-90 transition"
-                  onClick={() => setSelectedJob(job)}
+                  onClick={() => {
+                    if (!session?.user) {
+                      router.push("/auth/login");
+                      return;
+                    }
+                    setSelectedJob(job);
+                  }}
                 >
                   Apply Now
                 </button>

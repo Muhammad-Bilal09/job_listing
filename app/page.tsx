@@ -1,12 +1,14 @@
 "use client";
 
 import Jobs from "@/app/jobs/page";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { LuLogOut } from "react-icons/lu";
 import { companyLogos } from "@/constants/constants";
 
 export default function Page() {
+  const { data: session } = useSession();
+
   return (
     <div className="text-white">
       <nav className="flex justify-between items-center p-4 lg:p-6 shadow-md flex-wrap">
@@ -26,34 +28,35 @@ export default function Page() {
             </Link>
           </li>
           <li>
-            <Link className="cursor-pointer" href="/jobs">
-              Jobs
-            </Link>
-          </li>
-          <li>
             <Link className="cursor-pointer" href="/userApplication">
               userApplication
             </Link>
           </li>
         </ul>
         <div className="flex items-center space-x-3 lg:space-x-4 mt-3 lg:mt-0">
-          <Link className="text-sm max-sm:hidden" href="/auth/login">
-            Login
-          </Link>
-          <Link
-            className="px-4 py-2 max-sm:hidden bg-green-500 rounded-lg text-sm"
-            href="/auth/register"
-          >
-            Register
-          </Link>
-          <button
-            className="flex items-center gap-1 p-2 text-sm cursor-pointer text-black hover:text-white bg-red-500 hover:bg-red-400 rounded"
-            onClick={() => {
-              signOut();
-            }}
-          >
-            Logout <LuLogOut />
-          </button>
+          {!session && (
+            <>
+              <Link className="text-sm max-sm:hidden" href="/auth/login">
+                Login
+              </Link>
+              <Link
+                className="px-4 py-2 max-sm:hidden bg-green-500 rounded-lg text-sm"
+                href="/auth/register"
+              >
+                Register
+              </Link>
+            </>
+          )}
+          {session && (
+            <button
+              className="flex items-center gap-1 p-2 text-sm cursor-pointer text-black hover:text-white bg-red-500 hover:bg-red-400 rounded"
+              onClick={() => {
+                signOut();
+              }}
+            >
+              Logout <LuLogOut />
+            </button>
+          )}
         </div>
       </nav>
       <section className="flex flex-col items-center justify-center text-center mt-12 px-4 lg:px-0">

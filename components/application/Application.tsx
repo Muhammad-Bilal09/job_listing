@@ -27,7 +27,7 @@ export default function ApplicationPage() {
   });
 
   if (isLoading)
-    return <p className="text-center text-gray-500">Loading applications...</p>;
+    return <p className="text-center text-white">Loading applications...</p>;
   if (isError)
     return (
       <p className="text-center text-red-500">Failed to fetch applications</p>
@@ -68,7 +68,7 @@ export default function ApplicationPage() {
                     View Resume
                   </a>
                 </td>
-                <td className="p-3 border">
+                <td className="lg:flex p-3 border">
                   <button
                     onClick={() =>
                       updateStatusMutation.mutate({

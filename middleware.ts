@@ -6,12 +6,12 @@ export default async function middleware(req: NextRequest) {
 
   console.log(session, "middleware session");
 
-  const publicRoutes = ["/auth/login", "/auth/register"];
-  const adminRoutes = ["/dashboard", "/application"];
+  const publicRoutes = ["/", "/auth/login", "/auth/register"];
+  const adminRoutes = ["/dashboard"];
 
   if (!session) {
     if (!publicRoutes.includes(req.nextUrl.pathname)) {
-      return NextResponse.redirect(new URL("/auth/login", req.url));
+      return NextResponse.redirect(new URL("/", req.url));
     }
     return NextResponse.next();
   }
@@ -20,7 +20,7 @@ export default async function middleware(req: NextRequest) {
   console.log(userRole, "middleware userRole");
 
   if (publicRoutes.includes(req.nextUrl.pathname)) {
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.next();
   }
 
   if (adminRoutes.includes(req.nextUrl.pathname) && userRole !== "admin") {
@@ -31,5 +31,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/auth/:path*", "/dashboard", "/jobs", "/application"],
+  matcher: ["/", "/auth/:path*", "/dashboard", "/jobs", "/userApplication"],
 };
