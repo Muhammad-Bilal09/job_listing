@@ -38,7 +38,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       } lg:translate-x-0 lg:flex`}
     >
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-blue-500">Admin Panel</h2>
+        <Link href="/">
+          <h2 className="text-2xl font-bold text-blue-500">Admin Panel</h2>
+        </Link>
         <FaTimes
           className="lg:hidden text-white text-2xl cursor-pointer"
           onClick={() => setIsSidebarOpen(false)}

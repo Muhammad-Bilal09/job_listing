@@ -112,7 +112,7 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="p-6 min-h-screen flex flex-col items-center justify-center">
+    <div className="p-6 min-h-screen flex flex-col items-center">
       <h1 className="text-4xl font-extrabold my-6  text-blue-500">
         Job Listings
       </h1>
